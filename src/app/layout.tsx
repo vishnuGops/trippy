@@ -26,7 +26,8 @@ const unbounded = Unbounded({
 
 export const metadata: Metadata = {
   title: "Trippy | AI Travel Planner",
-  description: "Plan your next adventure with AI precision. Minimalist, intuitive, and intelligently crafted.",
+  description:
+    "Plan your next adventure with AI precision. Minimalist, intuitive, and intelligently crafted.",
 };
 
 export default function RootLayout({
@@ -39,10 +40,8 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${ultra.variable} ${unbounded.variable} antialiased min-h-screen flex flex-col`}
       >
-        <Navbar />
-        <main className="flex-grow">
-          {children}
-        </main>
+        {/* <Navbar /> */}
+        <main className="flex-grow">{children}</main>
       </body>
     </html>
   );

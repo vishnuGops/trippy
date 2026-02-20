@@ -1,10 +1,32 @@
 "use client";
 
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import Hyperspeed, { hyperspeedPresets } from "@/components/ui/Hyperspeed";
+import { joinWaitlist } from "@/app/actions/waitlist";
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button
+      type="submit"
+      variant="glass"
+      size="lg"
+      disabled={pending}
+      className="h-12 px-8 rounded-full text-base min-w-[160px] shadow-[0_0_20px_rgba(6,182,212,0.3)] border-cyan-500/30 hover:shadow-[0_0_40px_rgba(6,182,212,0.6)] hover:bg-cyan-500/10 transition-all duration-500 disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      {pending ? "Joining..." : "Join Waitlist"}
+    </Button>
+  );
+}
 
 export function Hero() {
+  const [state, formAction] = useActionState(joinWaitlist, null);
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
       {/* Background */}
@@ -39,21 +61,37 @@ export function Hero() {
             intelligently crafted for the modern explorer.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-10">
-            <Button
-              variant="glass"
-              size="lg"
-              className="h-14 px-10 rounded-full text-lg min-w-[200px] shadow-[0_0_20px_rgba(6,182,212,0.3)] border-cyan-500/30 hover:shadow-[0_0_40px_rgba(6,182,212,0.6)] hover:bg-cyan-500/10 transition-all duration-500"
-            >
-              Get Started
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="h-14 px-10 rounded-full text-lg min-w-[200px] border-white/10 hover:bg-white/5 hover:border-white/30 transition-all duration-300"
-            >
-              Watch Demo
-            </Button>
+          <div className="pt-10 w-full max-w-md mx-auto">
+            <form action={formAction} className="flex flex-col sm:flex-row items-center gap-4">
+              <Input
+                name="email"
+                type="email"
+                placeholder="Enter your email address"
+                required
+                className="h-12 bg-white/5 border-white/10 text-white placeholder:text-white/40 focus:ring-cyan-500/50 rounded-full px-6"
+              />
+              <SubmitButton />
+            </form>
+            
+            {state?.error && (
+              <motion.p 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-red-400 mt-4 text-sm font-medium"
+              >
+                {state.error}
+              </motion.p>
+            )}
+            
+            {state?.success && (
+              <motion.p 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-green-400 mt-4 text-sm font-medium"
+              >
+                {state.success}
+              </motion.p>
+            )}
           </div>
         </motion.div>
       </div>

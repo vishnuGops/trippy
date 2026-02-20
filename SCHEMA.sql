@@ -72,3 +72,20 @@ create policy "Users can update their own trips." on trips
 
 create policy "Users can delete their own trips." on trips
   for delete using (auth.uid() = user_id);
+
+-- Create waitlist table if it doesn't exist
+create table if not exists waitlist (
+  id uuid default gen_random_uuid() primary key,
+  email text unique not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- RLS for waitlist
+alter table waitlist enable row level security;
+
+-- Drop existing policies if they exist to avoid duplication/errors on re-run
+drop policy if exists "Anyone can insert into waitlist." on waitlist;
+
+-- Allow anyone to insert into waitlist (public access needed for landing page)
+create policy "Anyone can insert into waitlist." on waitlist
+  for insert with check (true);
