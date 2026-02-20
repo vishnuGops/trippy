@@ -3,10 +3,22 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { motion, useScroll, useMotionValueEvent, AnimatePresence } from 'framer-motion'
-import { Menu, X } from 'lucide-react'
-import { useState } from 'react'
+import { Menu, X, LogOut, User as UserIcon } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+import { User } from '@supabase/supabase-js'
+import { AuthModal } from '@/components/auth/auth-modal'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 const navLinks = [
   { href: '/my-trips', label: 'My Trips' },
@@ -19,6 +31,32 @@ export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
+  
+  // Auth State
+  const [user, setUser] = useState<User | null>(null)
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+  const supabase = createClient()
+  const router = useRouter()
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+    }
+
+    getUser()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
+    router.refresh()
+  }
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     setIsScrolled(latest > 20)
@@ -63,11 +101,46 @@ export function Navbar() {
             ))}
           </div>
 
-          {/* Desktop CTA */}
+          {/* Desktop CTA / Auth */}
           <div className="hidden md:flex items-center gap-4">
-            <Button variant="glass" size="sm" className="rounded-full h-9 px-5 glow-on-hover">
-              Get Started
-            </Button>
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                    <Avatar className="h-10 w-10 border border-white/10">
+                      <AvatarImage src={user.user_metadata?.avatar_url} alt={user.user_metadata?.name || 'User'} />
+                      <AvatarFallback className="bg-indigo-500 text-white">
+                        {user.email?.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 bg-black/90 backdrop-blur-xl border-white/10 text-white" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{user.user_metadata?.name || 'User'}</p>
+                      <p className="text-xs leading-none text-muted-foreground opacity-70">
+                        {user.email}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-white/10" />
+                  <DropdownMenuItem onClick={handleSignOut} className="focus:bg-white/10 focus:text-white cursor-pointer">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button 
+                variant="glass" 
+                size="sm" 
+                className="rounded-full h-9 px-5 glow-on-hover"
+                onClick={() => setIsAuthModalOpen(true)}
+              >
+                Sign In
+              </Button>
+            )}
           </div>
 
           {/* Mobile Menu Toggle */}
@@ -108,14 +181,54 @@ export function Navbar() {
                     {link.label}
                   </Link>
                 ))}
-                <Button variant="glass" size="lg" className="w-full rounded-full mt-2">
-                  Get Started
-                </Button>
+                
+                {user ? (
+                   <div className="flex flex-col items-center gap-4 w-full pt-4 border-t border-white/10">
+                     <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10 border border-white/10">
+                          <AvatarImage src={user.user_metadata?.avatar_url} alt={user.user_metadata?.name || 'User'} />
+                          <AvatarFallback className="bg-indigo-500 text-white">
+                            {user.email?.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="text-left">
+                          <p className="text-sm font-medium text-white">{user.user_metadata?.name || 'User'}</p>
+                          <p className="text-xs text-white/60">{user.email}</p>
+                        </div>
+                     </div>
+                     <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full rounded-full"
+                        onClick={handleSignOut}
+                      >
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Log out
+                      </Button>
+                   </div>
+                ) : (
+                  <Button 
+                    variant="glass" 
+                    size="lg" 
+                    className="w-full rounded-full mt-2"
+                    onClick={() => {
+                      setIsOpen(false)
+                      setIsAuthModalOpen(true)
+                    }}
+                  >
+                    Sign In
+                  </Button>
+                )}
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)} 
+      />
     </>
   )
 }
