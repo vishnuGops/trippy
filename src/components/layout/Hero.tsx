@@ -2,55 +2,14 @@
 
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import Hyperspeed, { hyperspeedPresets } from "@/components/ui/Hyperspeed";
 
 export function Hero() {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
-      {/* Background Blobs */}
-      <div className="absolute inset-0 pointer-events-none">
-        <motion.div
-          animate={{
-            scale: [1, 1.2, 1],
-            x: [0, 100, 0],
-            y: [0, -50, 0],
-            rotate: [0, 45, 0],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="absolute top-[20%] left-[20%] w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-[100px] mix-blend-screen"
-        />
-        <motion.div
-          animate={{
-            scale: [1, 1.3, 1],
-            x: [0, -100, 0],
-            y: [0, 100, 0],
-            rotate: [0, -45, 0],
-          }}
-          transition={{
-            duration: 25,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 2,
-          }}
-          className="absolute bottom-[20%] right-[10%] w-[600px] h-[600px] bg-cyan-500/20 rounded-full blur-[120px] mix-blend-screen"
-        />
-        <motion.div
-          animate={{
-            scale: [1, 1.4, 1],
-            x: [0, 50, 0],
-            y: [0, 50, 0],
-          }}
-          transition={{
-            duration: 18,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1,
-          }}
-          className="absolute top-[40%] right-[30%] w-[400px] h-[400px] bg-violet-500/20 rounded-full blur-[90px] mix-blend-screen"
-        />
+      {/* Background */}
+      <div className="absolute inset-0 z-0">
+        <Hyperspeed effectOptions={hyperspeedPresets.one} />
       </div>
 
       {/* Content */}
@@ -98,9 +57,6 @@ export function Hero() {
           </div>
         </motion.div>
       </div>
-
-      {/* Decorative Grid */}
-      <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-10 pointer-events-none" />
     </section>
   );
 }
