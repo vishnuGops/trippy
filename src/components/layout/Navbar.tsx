@@ -6,18 +6,19 @@ import { motion, useScroll, useMotionValueEvent, AnimatePresence } from 'framer-
 import { Menu, X } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
+import { usePathname } from 'next/navigation'
 
 const navLinks = [
-  { href: '#features', label: 'Features' },
-  { href: '#destinations', label: 'Destinations' },
-  { href: '#pricing', label: 'Pricing' },
-  { href: '#about', label: 'About' },
+  { href: '/my-trips', label: 'My Trips' },
+  { href: '/calendar', label: 'Calendar' },
+  { href: '/plan-now', label: 'Plan Now' },
 ]
 
 export function Navbar() {
   const { scrollY } = useScroll()
   const [isScrolled, setIsScrolled] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
+  const pathname = usePathname()
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     setIsScrolled(latest > 20)
@@ -52,7 +53,10 @@ export function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-sm font-medium text-white/80 hover:text-white hover:scale-105 transition-all duration-200"
+                className={cn(
+                  "text-sm font-medium transition-all duration-200 hover:text-white hover:scale-105",
+                  pathname === link.href ? "text-white scale-105 font-bold" : "text-white/80"
+                )}
               >
                 {link.label}
               </Link>
@@ -95,7 +99,10 @@ export function Navbar() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className="text-lg font-medium text-white/80 hover:text-white transition-colors w-full py-2"
+                    className={cn(
+                        "text-lg font-medium transition-colors w-full py-2 hover:text-white",
+                        pathname === link.href ? "text-white font-bold" : "text-white/80"
+                    )}
                     onClick={() => setIsOpen(false)}
                   >
                     {link.label}
