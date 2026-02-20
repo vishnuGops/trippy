@@ -12,9 +12,22 @@
 
 body {
   @apply bg-[var(--background)] text-[var(--foreground)] antialiased overflow-x-hidden min-h-screen relative;
+  font-family: var(--font-geist-sans), sans-serif;
   background-image: 
     radial-gradient(circle at 50% 0%, rgba(120, 119, 198, 0.1), transparent 40%),
     radial-gradient(circle at 100% 0%, rgba(79, 70, 229, 0.05), transparent 40%);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-unbounded), sans-serif;
+}
+
+.logo-font {
+  font-family: var(--font-ultra), serif;
+}
+
+.heading-font {
+  font-family: var(--font-unbounded), sans-serif;
 }
 
 /* Custom Glassmorphism Utilities */
